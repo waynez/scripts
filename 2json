@@ -1,0 +1,45 @@
+#!/usr/bin/env python
+__author__ = "Wayne Zheng(wayne.zhengw[at]gmail.com)"
+
+import argparse
+import logging
+import sys
+import os
+import json
+import collections
+
+logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
+
+class Config():
+    source = None
+    output = None
+
+    @staticmethod
+    def parse():
+        parser = argparse.ArgumentParser()
+        parser.add_argument('-s', '--source', metavar="input_file", action="store", help="The source file to be converted", required=True)
+        parser.add_argument('-o', '--output', metavar="output_file", action="store", help="The output file to be stored. Default will be stored as out.json", default='out.json')
+
+        args = parser.parse_args()
+
+        Config.source = args.source
+        Config.output = args.output
+
+        if Config.source:
+            if not os.path.exists(Config.source):
+                raise argparse.ArgumentTypeError('input file does not exist')
+
+        if os.path.dirname(Config.output) == '' or os.path.dirname(Config.output) == '.' :
+            Config.output = os.path.join(os.getcwd(), os.path.basename(Config.output))
+
+if __name__ == '__main__':
+    Config.parse()
+
+    with open(Config.source, 'r') as fp:
+        hcl = json.load(fp, object_pairs_hook=collections.OrderedDict)
+        txt = json.dumps(hcl, indent=4)
+
+    with open(Config.output, 'w') as fp:
+        fp.write(txt)
+
+    logging.info("Completed processing, converted JSON file stored as {0}".format(Config.output))
