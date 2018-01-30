@@ -10,6 +10,7 @@ import collections
 
 logging.basicConfig(stream=sys.stdout, level=logging.DEBUG)
 
+
 class Config():
     source = None
     output = None
@@ -29,17 +30,17 @@ class Config():
             if not os.path.exists(Config.source):
                 raise argparse.ArgumentTypeError('input file does not exist')
 
-        if os.path.dirname(Config.output) == '' or os.path.dirname(Config.output) == '.' :
+        if os.path.dirname(Config.output) == '' or os.path.dirname(Config.output) == '.':
             Config.output = os.path.join(os.getcwd(), os.path.basename(Config.output))
+
 
 if __name__ == '__main__':
     Config.parse()
 
     with open(Config.source, 'r') as fp:
-        hcl = json.load(fp, object_pairs_hook=collections.OrderedDict)
-        txt = json.dumps(hcl, indent=4)
+        content = json.load(fp, object_pairs_hook=collections.OrderedDict)
 
     with open(Config.output, 'w') as fp:
-        fp.write(txt)
+        json.dump(content, fp, indent=4)
 
     logging.info("Completed processing, converted JSON file stored as {0}".format(Config.output))
