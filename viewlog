@@ -1,0 +1,37 @@
+#!/bin/sh
+if [ $# -ne 1 ]
+then
+   echo "Bad Parameter"
+   echo "Supported commands: $0 <url>"
+   exit
+fi
+
+# Set up log directory
+LOG_DIRECTORY='/tmp/zhengw/log/'
+if [ ! -d $LOG_DIRECTORY ]; then
+   mkdir $LOG_DIRECTORY
+fi
+
+# Download the log
+url=$1
+if [ -f $LOG_DIRECTORY/$(basename "$url") ]; then
+   /bin/rm -rf $LOG_DIRECTORY/$(basename "$url")
+fi
+wget -P $LOG_DIRECTORY $url
+
+# Renew the timestamp
+touch $LOG_DIRECTORY/$(basename "$url")
+
+# Clear logs last check 3 days ago
+current=`date +%s`
+SECS_PER_DAY=86400
+for file in $LOG_DIRECTORY/*; do
+   last_modified=`stat -c "%Y" $file`
+   if [ $(($current-$last_modified)) -gt $(($SECS_PER_DAY*3)) ]; then
+      echo "deleting $file"
+      /bin/rm -rf $file
+   fi
+done
+
+cat $LOG_DIRECTORY/$(basename "$url") | vim -
+exit 0
