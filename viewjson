@@ -1,0 +1,32 @@
+#!/usr/bin/env python
+
+import sys
+import json
+import argparse
+import requests
+
+if __name__ == '__main__':
+   parser = argparse.ArgumentParser()
+   parser.add_argument('url', metavar='url', help="The URL to read")
+   args = parser.parse_args()
+   url = args.url
+
+   try:
+       response = requests.get(url)
+       if(response.ok):
+           try:
+               data = json.loads(response.content)
+               print(json.dumps(data, indent=4))
+           except:
+               print("URL doesn't respond in JSON! The first 10 lines of the response:\n")
+
+               print('\n'.join(response.text.splitlines()[:10]))
+               sys.exit(-1)
+       else:
+           print("URL doesn't respond properly! {}".format(response.status_code))
+           sys.exit(-1)
+   except requests.exceptions.RequestException as e:
+       print("Exception:\n{}".format(e))
+       sys.exit(-1)
+
+   sys.exit(0)
