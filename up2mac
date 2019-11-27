@@ -1,0 +1,36 @@
+#!/bin/sh
+function usage {
+   echo "Usage: $0 <FILE> [REMOTE_FOLDER]"
+   echo "       <FILE> The file to upload to MAC"
+   echo "       [REMOTE_FOLDER] The remote directory to upload on MAC; if not given, will upload to Downloads"
+   exit 1
+}
+
+MacIp_File='/mts/home1/zhengw/FileHub/mac_ip'
+MacIp=$(cat $MacIp_File)
+
+if [[ $MacIp =~ ^[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+$ ]]
+then
+   echo "Uploading to ${MacIp}..."
+else
+   echo "No valid IP found in ${MacIp_File}"
+   exit 1
+fi
+
+if ( [ $# -ne 1 ] && [ $# -ne 2 ] )
+then
+   usage
+   exit 1
+fi
+
+Remote_Folder='/Users/zhengw/Downloads/'
+File=$1
+if [ $# -eq 2 ]
+then
+   Remote_Folder=$2
+fi
+
+echo "Uploading file($File) to remote directory($MacIp:$Remote_Folder)"
+scp $File $MacIp:$Remote_Folder
+
+echo "Done!"
