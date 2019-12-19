@@ -25,12 +25,12 @@ Usage: up2mac <FILE> [REMOTE_FOLDER]
 ```
 
 ## viewjson
-A python script to read JSON formatted HTTP respones from a URL
+A python script to read JSON from a file or URL
 ```bash
-usage: viewjson [-h] url
+usage: viewjson [-h] src
 
 positional arguments:
-  url         The URL to read
+  src         The source of the JSON text to read, could be a file or URL
 
 optional arguments:
   -h, --help  show this help message and exit

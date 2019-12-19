@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 
+import os
 import sys
 import json
 import argparse
@@ -7,26 +8,36 @@ import requests
 
 if __name__ == '__main__':
    parser = argparse.ArgumentParser()
-   parser.add_argument('url', metavar='url', help="The URL to read")
+   parser.add_argument('source', metavar='src', help="The source of the JSON text to read, could be a file or URL")
    args = parser.parse_args()
-   url = args.url
-
-   try:
-       response = requests.get(url)
-       if(response.ok):
+   source = args.source
+   if os.path.isfile(source):
+       with open(source, 'r') as fp:
            try:
-               data = json.loads(response.content)
+               data = json.load(fp)
                print(json.dumps(data, indent=4))
            except:
-               print("URL doesn't respond in JSON! The first 10 lines of the response:\n")
+               print("Error loading JSON from {}".format(source))
 
-               print('\n'.join(response.text.splitlines()[:10]))
+               print('\n'.join(fp.readlines()[:10]))
                sys.exit(-1)
-       else:
-           print("URL doesn't respond properly! {}".format(response.status_code))
+   else:
+       try:
+           response = requests.get(source)
+           if(response.ok):
+               try:
+                   data = json.loads(response.content)
+                   print(json.dumps(data, indent=4))
+               except:
+                   print("URL doesn't respond in JSON! The first 10 lines of the response:\n")
+
+                   print('\n'.join(response.text.splitlines()[:10]))
+                   sys.exit(-1)
+           else:
+               print("URL doesn't respond properly! {}".format(response.status_code))
+               sys.exit(-1)
+       except requests.exceptions.RequestException as e:
+           print("Exception:\n{}".format(e))
            sys.exit(-1)
-   except requests.exceptions.RequestException as e:
-       print("Exception:\n{}".format(e))
-       sys.exit(-1)
 
    sys.exit(0)
