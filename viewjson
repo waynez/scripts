@@ -22,7 +22,7 @@ if __name__ == '__main__':
 
                print('\n'.join(fp.readlines()[:10]))
                sys.exit(-1)
-   else:
+   elif 'http' in source.lower():
        try:
            response = requests.get(source)
            if(response.ok):
@@ -40,5 +40,13 @@ if __name__ == '__main__':
        except requests.exceptions.RequestException as e:
            print("Exception:\n{}".format(e))
            sys.exit(-1)
+   else:
+      # Try load the input with JSON
+      try:
+         data = json.loads(source)
+         print(json.dumps(data, indent=4))
+      except Exception as e:
+         print("Exception:\n{}".format(e))
+         sys.exit(-1)
 
    sys.exit(0)
