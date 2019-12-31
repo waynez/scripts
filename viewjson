@@ -10,8 +10,10 @@ from collections import OrderedDict
 if __name__ == '__main__':
    parser = argparse.ArgumentParser()
    parser.add_argument('source', metavar='src', help="The source of the JSON text to read, could be a file or URL")
+   parser.add_argument('--payload', metavar='payload', help="When used with URL, the payload in JSON file to be sent")
    args = parser.parse_args()
    source = args.source
+   payload = args.payload
    if os.path.isfile(source):
        with open(source, 'r') as fp:
            try:
@@ -24,7 +26,13 @@ if __name__ == '__main__':
                sys.exit(-1)
    elif 'http' in source.lower():
        try:
-           response = requests.get(source)
+           param = None
+           if payload:
+              payload = os.path.join(os.getcwd(), args.payload)
+              assert(os.path.isfile(payload))
+              with open(payload, 'r') as fp:
+                 param = json.load(fp)
+           response = requests.request('GET', source, json=param)
            if(response.ok):
                try:
                    data = json.loads(response.content)
@@ -36,6 +44,7 @@ if __name__ == '__main__':
                    sys.exit(-1)
            else:
                print("URL doesn't respond properly! {}".format(response.status_code))
+               print("Remote server says: {}".format(response.content))
                sys.exit(-1)
        except requests.exceptions.RequestException as e:
            print("Exception:\n{}".format(e))
